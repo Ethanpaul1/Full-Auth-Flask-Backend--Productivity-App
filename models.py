@@ -33,3 +33,31 @@ class User(db.Model):
         # Safe serialization — never include _password_hash here
         return {'id': self.id, 'username': self.username}
 
+
+class Workout(db.Model):
+    __tablename__ = 'workouts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)         # e.g. "Morning Run"
+    exercise_type = db.Column(db.String(50), nullable=False)  # e.g. "Running", "HIIT"
+    duration_minutes = db.Column(db.Integer, nullable=False)  # e.g. 45
+    notes = db.Column(db.Text)                                 # optional free-text
+    date = db.Column(db.String(20))                            # e.g. "2026-08-01"
+
+    # Foreign key links each workout to exactly one user
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    user = db.relationship('User', back_populates='workouts')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'exercise_type': self.exercise_type,
+            'duration_minutes': self.duration_minutes,
+            'notes': self.notes,
+            'date': self.date,
+            'user_id': self.user_id,
+        }
+
+
