@@ -28,3 +28,20 @@ class Signup(Resource):
         session['user_id'] = user.id
         return user.to_dict(), 201
 
+
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        user = User.query.filter_by(username=username).first()
+
+        # authenticate() runs bcrypt.check_password_hash internally
+        if not user or not user.authenticate(password):
+            return {'error': 'Invalid username or password.'}, 401
+
+        session['user_id'] = user.id
+        return user.to_dict(), 200
+
+
