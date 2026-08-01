@@ -45,3 +45,15 @@ class Login(Resource):
         return user.to_dict(), 200
 
 
+class Logout(Resource):
+    def delete(self):
+        # Return 401 if the user was not logged in to begin with
+        if not session.get('user_id'):
+            return {'error': 'Not logged in.'}, 401
+
+        # Clear the session — the cookie still exists but user_id is now None
+        session['user_id'] = None
+        return {}, 204
+
+
+
