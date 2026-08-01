@@ -56,4 +56,23 @@ class Logout(Resource):
         return {}, 204
 
 
+class Me(Resource):
+    """
+    Check session endpoint — called by the frontend on every page refresh.
+    Returns the logged-in user so the app does not redirect to /login unnecessarily.
+    """
+    def get(self):
+        user_id = session.get('user_id')
+
+        if not user_id:
+            return {'error': 'Unauthorized.'}, 401
+
+        user = User.query.get(user_id)
+        if not user:
+            return {'error': 'User not found.'}, 404
+
+        return user.to_dict(), 200
+
+
+
 
