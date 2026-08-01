@@ -101,5 +101,27 @@ class WorkoutDetail(Resource):
         db.session.commit()
         return workout.to_dict(), 200
 
+    def delete(self, id):
+        """
+        DELETE /workouts/<id>
+        Deletes a workout by ID.
+        Only the owner of the workout can delete it — returns 403 otherwise.
+        """
+        user_id = get_current_user_id()
+        if not user_id:
+            return {'error': 'Unauthorized. Please log in.'}, 401
+
+        workout = Workout.query.get(id)
+        if not workout:
+            return {'error': 'Workout not found.'}, 404
+
+        if workout.user_id != user_id:
+            return {'error': 'Forbidden. You can only delete your own workouts.'}, 403
+
+        db.session.delete(workout)
+        db.session.commit()
+        return {}, 204
+
+
 
 
