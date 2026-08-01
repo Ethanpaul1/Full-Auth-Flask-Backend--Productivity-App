@@ -41,3 +41,35 @@ class WorkoutList(Resource):
             'current_page': paginated.page,
         }, 200
 
+    def post(self):
+        """
+        POST /workouts
+        Creates a new workout for the logged-in user.
+        Required body fields: title, exercise_type, duration_minutes
+        """
+        user_id = get_current_user_id()
+        if not user_id:
+            return {'error': 'Unauthorized. Please log in.'}, 401
+
+        data = request.get_json()
+        title = data.get('title')
+        exercise_type = data.get('exercise_type')
+        duration_minutes = data.get('duration_minutes')
+
+        # Validate required fields before writing to the database
+        if not title or not exercise_type or not duration_minutes:
+            return {'error': 'title, exercise_type, and duration_minutes are required.'}, 422
+
+        workout = Workout(
+            title=title,
+            exercise_type=exercise_type,
+            duration_minutes=duration_minutes,
+            notes=data.get('notes', ''),
+            date=data.get('date', ''),
+            user_id=user_id,
+        )
+        db.session.add(workout)
+        db.session.commit()
+        return workout.to_dict(), 201
+
+
