@@ -73,3 +73,33 @@ class WorkoutList(Resource):
         return workout.to_dict(), 201
 
 
+class WorkoutDetail(Resource):
+    def patch(self, id):
+        """
+        PATCH /workouts/<id>
+        Updates a workout by ID.
+        Only the owner of the workout can update it — returns 403 otherwise.
+        """
+        user_id = get_current_user_id()
+        if not user_id:
+            return {'error': 'Unauthorized. Please log in.'}, 401
+
+        workout = Workout.query.get(id)
+        if not workout:
+            return {'error': 'Workout not found.'}, 404
+
+        # 403 Forbidden — you are authenticated but this is not your workout
+        if workout.user_id != user_id:
+            return {'error': 'Forbidden. You can only edit your own workouts.'}, 403
+
+        data = request.get_json()
+        # Only update fields that were actually sent in the request body
+        for field in ['title', 'exercise_type', 'duration_minutes', 'notes', 'date']:
+            if field in data:
+                setattr(workout, field, data[field])
+
+        db.session.commit()
+        return workout.to_dict(), 200
+
+
+
